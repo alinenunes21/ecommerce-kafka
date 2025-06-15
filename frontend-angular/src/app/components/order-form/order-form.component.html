@@ -1,0 +1,135 @@
+<!-- src/app/components/order-form/order-form.component.html -->
+
+<div class="order-form-container">
+  <div class="form-header">
+    <h2>🛒 Novo Pedido</h2>
+    <p>Sistema de Gestão Comercial</p>
+  </div>
+
+  <!-- Mensagens de Sucesso/Erro -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    <span class="alert-icon">✅</span>
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <span class="alert-icon">❌</span>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Formulário -->
+  <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="order-form">
+    
+    <!-- Lista de Itens -->
+    <div class="items-section">
+      <h3>📦 Itens do Pedido</h3>
+      
+      <div formArrayName="items" class="items-container">
+        <div 
+          *ngFor="let item of items.controls; let i = index" 
+          [formGroupName]="i" 
+          class="item-card"
+        >
+          <!-- Header do Item -->
+          <div class="item-header">
+            <h4>Item {{ i + 1 }}</h4>
+            <button 
+              type="button" 
+              (click)="removeItem(i)"
+              [disabled]="items.length === 1"
+              class="btn btn-danger btn-sm"
+            >
+              🗑️ Remover
+            </button>
+          </div>
+
+          <!-- Campos do Item -->
+          <div class="item-fields">
+            <!-- Nome do Produto -->
+            <div class="form-group">
+              <label for="productName-{{i}}">Nome do Produto:</label>
+              <input
+                type="text"
+                id="productName-{{i}}"
+                formControlName="productName"
+                placeholder="Ex: Smartphone Galaxy S24"
+                [class.error]="hasError(i, 'productName')"
+              >
+              <div *ngIf="hasError(i, 'productName')" class="error-message">
+                {{ getErrorMessage(i, 'productName') }}
+              </div>
+            </div>
+
+            <!-- Quantidade -->
+            <div class="form-group">
+              <label for="quantity-{{i}}">Quantidade:</label>
+              <input
+                type="number"
+                id="quantity-{{i}}"
+                formControlName="quantity"
+                min="1"
+                [class.error]="hasError(i, 'quantity')"
+              >
+              <div *ngIf="hasError(i, 'quantity')" class="error-message">
+                {{ getErrorMessage(i, 'quantity') }}
+              </div>
+            </div>
+
+            <!-- Preço -->
+            <div class="form-group">
+              <label for="price-{{i}}">Preço (R$):</label>
+              <input
+                type="number"
+                id="price-{{i}}"
+                formControlName="price"
+                step="0.01"
+                min="0.01"
+                placeholder="299.99"
+                [class.error]="hasError(i, 'price')"
+              >
+              <div *ngIf="hasError(i, 'price')" class="error-message">
+                {{ getErrorMessage(i, 'price') }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Subtotal do Item -->
+          <div class="item-subtotal">
+            <strong>
+              Subtotal: R$ {{ 
+                ((item.get('quantity')?.value || 0) * (item.get('price')?.value || 0)) | number:'1.2-2' 
+              }}
+            </strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botão Adicionar Item -->
+      <button 
+        type="button" 
+        (click)="addItem()" 
+        class="btn btn-secondary"
+      >
+        + Adicionar Item
+      </button>
+    </div>
+
+    <!-- Total do Pedido -->
+    <div class="order-total">
+      <h3>💰 Total do Pedido: R$ {{ getTotal() | number:'1.2-2' }}</h3>
+    </div>
+
+    <!-- Botão de Envio -->
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        [disabled]="orderForm.invalid || isLoading"
+        class="btn btn-primary btn-large"
+      >
+        <span *ngIf="isLoading" class="loading">⏳</span>
+        <span *ngIf="!isLoading">🚀</span>
+        {{ isLoading ? 'Processando...' : 'Finalizar Pedido' }}
+      </button>
+    </div>
+  </form>
+</div>
