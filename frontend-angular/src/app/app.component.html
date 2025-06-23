@@ -5,51 +5,89 @@
     <p>Sistema de Gestão de Pedidos</p>
   </header>
 
-  <!-- Catálogo de Produtos -->
-  <main class="main-content">
-    <h2>📦 Produtos Disponíveis</h2>
+  <!-- Layout principal - classe condicional baseada no carrinho -->
+  <div class="main-layout" [ngClass]="cart.length > 0 ? 'with-cart' : 'without-cart'">
     
-    <div class="products-grid">
-      <div *ngFor="let product of products" class="product-card">
-        <img [src]="product.image_url" [alt]="product.name" class="product-image">
+    <!-- Seção de produtos (sempre presente) -->
+    <div class="products-section">
+      <main class="main-content">
+        <h2>📦 Produtos Disponíveis</h2>
         
-        <div class="product-info">
-          <h3>{{ product.name }}</h3>
-          <p>{{ product.description }}</p>
-          <div class="product-price">R$ {{ product.price | number:'1.2-2' }}</div>
-          <div class="product-stock">📦 {{ product.stock_quantity }} disponível</div>
-          
-          <button 
-            (click)="addToCart(product)" 
-            class="btn-add-cart"
-            [disabled]="product.stock_quantity === 0"
-          >
-            🛒 Adicionar ao Carrinho
-          </button>
+        <div class="products-grid">
+          <div *ngFor="let product of products" class="product-card">
+            <img [src]="product.image_url" [alt]="product.name" class="product-image">
+            
+            <div class="product-info">
+              <h3>{{ product.name }}</h3>
+              <p>{{ product.description }}</p>
+              <div class="product-price">R$ {{ product.price | number:'1.2-2' }}</div>
+              <div class="product-stock">📦 {{ product.stock_quantity }} disponível</div>
+              
+              <button 
+                (click)="addToCart(product)" 
+                class="btn-add-cart"
+                [disabled]="product.stock_quantity === 0"
+              >
+                🛒 Adicionar ao Carrinho
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
 
-    <!-- Carrinho -->
-    <div *ngIf="cart.length > 0" class="cart-section">
-      <h3>🛒 Carrinho ({{ cart.length }} itens)</h3>
-      
+    <!-- Carrinho lateral (só aparece quando tem itens) -->
+    <aside class="cart-sidebar" *ngIf="cart.length > 0">
+      <!-- Cabeçalho do carrinho -->
+      <div class="cart-header">
+        <h3>🛒 Carrinho</h3>
+        <div class="cart-badge">{{ cart.length }}</div>
+      </div>
+
+      <!-- Itens do carrinho -->
       <div class="cart-items">
         <div *ngFor="let item of cart" class="cart-item">
-          <span>{{ item.name }}</span>
-          <span>Qtd: {{ item.quantity }}</span>
-          <span>R$ {{ item.price | number:'1.2-2' }}</span>
-          <button (click)="removeFromCart(item.id)" class="btn-remove">❌</button>
+          
+          <div class="cart-item-header">
+            <span class="cart-item-name">{{ item.name }}</span>
+            <button (click)="removeFromCart(item.id)" class="btn-remove" title="Remover item">
+              ❌
+            </button>
+          </div>
+          
+          <div class="cart-item-details">
+            <span class="cart-item-quantity">Qtd: {{ item.quantity }}</span>
+            <span class="cart-item-price">R$ {{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+          </div>
+          
         </div>
       </div>
 
-      <div class="cart-total">
-        <strong>Total: R$ {{ getCartTotal() | number:'1.2-2' }}</strong>
-      </div>
+      <!-- Resumo do carrinho -->
+      <div class="cart-summary">
+        <div class="cart-total">
+          <strong>Total: R$ {{ getCartTotal() | number:'1.2-2' }}</strong>
+        </div>
 
-      <button (click)="checkout()" class="btn-checkout">
-        🚀 Finalizar Compra
+        <button 
+          (click)="checkout()" 
+          class="btn-checkout"
+        >
+          🚀 Finalizar Compra
+        </button>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Alerta personalizado -->
+  <div class="custom-alert-overlay" *ngIf="showAlert">
+    <div class="custom-alert">
+      <div class="custom-alert-icon">✅</div>
+      <div class="custom-alert-message">{{ alertMessage }}</div>
+      <button class="custom-alert-button" (click)="closeAlert()">
+        OK
       </button>
     </div>
-  </main>
+  </div>
 </div>

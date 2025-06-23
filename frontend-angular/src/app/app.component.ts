@@ -22,6 +22,10 @@ export class AppComponent implements OnInit {
   
   products: Product[] = [];
   cart: CartItem[] = [];
+  
+  // Propriedades para o alerta personalizado
+  showAlert: boolean = false;
+  alertMessage: string = '';
 
   constructor(
     private productService: ProductService,
@@ -40,7 +44,7 @@ export class AppComponent implements OnInit {
       },
       error: (error) => {
         console.error('❌ Erro ao carregar produtos da API:', error);
-        alert('Erro ao carregar produtos. Verifique se o inventory-service está rodando.');
+        this.showCustomAlert('Erro ao carregar produtos. Verifique se o inventory-service está rodando.');
       }
     });
   }
@@ -73,7 +77,7 @@ export class AppComponent implements OnInit {
 
   checkout(): void {
     if (this.cart.length === 0) {
-      alert('Carrinho vazio!');
+      this.showCustomAlert('Carrinho vazio!');
       return;
     }
 
@@ -91,13 +95,24 @@ export class AppComponent implements OnInit {
     this.orderService.createOrder(order).subscribe({
       next: (response) => {
         console.log('✅ Pedido criado:', response);
-        alert('Pedido criado com sucesso!');
+        this.showCustomAlert('Compra realizada com sucesso! 🎉');
         this.cart = []; // Limpa carrinho
       },
       error: (error) => {
         console.error('❌ Erro:', error);
-        alert('Erro ao criar pedido: ' + error.message);
+        this.showCustomAlert('Erro ao processar compra: ' + error.message);
       }
     });
+  }
+
+  // Métodos para o alerta personalizado
+  showCustomAlert(message: string): void {
+    this.alertMessage = message;
+    this.showAlert = true;
+  }
+
+  closeAlert(): void {
+    this.showAlert = false;
+    this.alertMessage = '';
   }
 }
